@@ -22,7 +22,7 @@ export const CanvasComponent = () => {
 
   const sketch = (p: p5) => {
     p.setup = () => {
-      p.createCanvas(720, 480)
+      p.createCanvas(800, 900)
       video = p.createCapture(p.VIDEO)
       if (!video) return
       video.size(p.width, p.height)
@@ -35,43 +35,45 @@ export const CanvasComponent = () => {
       video.hide()
     }
 
+    ml5.modelReady = () => {
+      console.log('ready!')
+    }
+
     p.draw = () => {
       video && p.image(video, 0, 0, p.width, p.height)
-      console.log(poses)
+      // console.log(poses)
       drawKeypoints()
       drawSkeleton()
     }
 
     function drawKeypoints() {
       if (!poses) return
-      for (let i = 0; i < poses.length; i++) {
-        let pose = poses[i].pose
-        for (let j = 0; j < pose.keypoints.length; j++) {
-          let keypoint = pose.keypoints[j]
-          if (keypoint.score > 0.2) {
-            p.fill(255, 0, 0)
-            p.noStroke()
-            p.ellipse(keypoint.position.x, keypoint.position.y, 10, 10)
-          }
+      let pose = poses[0].pose
+      for (let j = 0; j < pose.keypoints.length; j++) {
+        let keypoint = pose.keypoints[j]
+        if (keypoint.score > 0.2) {
+          p.fill(0, 0, 0)
+          p.stroke(255, 255, 255)
+          p.strokeWeight(8)
+          p.ellipse(keypoint.position.x, keypoint.position.y, 20, 20)
         }
       }
     }
 
     function drawSkeleton() {
       if (!poses) return
-      for (let i = 0; i < poses.length; i++) {
-        let skeleton = poses[i].skeleton
-        for (let j = 0; j < skeleton.length; j++) {
-          let partA = skeleton[j][0]
-          let partB = skeleton[j][1]
-          p.stroke(255, 0, 0)
-          p.line(
-            partA.position.x,
-            partA.position.y,
-            partB.position.x,
-            partB.position.y
-          )
-        }
+      let skeleton = poses[0].skeleton
+      for (let j = 0; j < skeleton.length; j++) {
+        let partA = skeleton[j][0]
+        let partB = skeleton[j][1]
+        p.stroke(255, 255, 255)
+        p.strokeWeight(20)
+        p.line(
+          partA.position.x,
+          partA.position.y,
+          partB.position.x,
+          partB.position.y
+        )
       }
     }
   }
