@@ -19,8 +19,8 @@ export const CanvasComponent = () => {
   let video
   let poseNet
   let poses
-  var ccount = 0
-  var count = 0
+  var ccount = 0 // counts()を回した回数
+  var count = 0 // スクワット回数もどき
   var max: number = 900
   var min: number = 0
   var down: boolean = false
@@ -45,6 +45,7 @@ export const CanvasComponent = () => {
       console.log('ready!')
     }
 
+    // 0.01秒ごとに実行される
     p.draw = () => {
       video && p.image(video, 0, 0, p.width, p.height)
       if (!poses) return
@@ -89,18 +90,19 @@ export const CanvasComponent = () => {
       let dis: number
       let nose = poses[0].pose.keypoints[0]
       // console.log(nose)
-      let position: number = nose.position.y
+      let position: number = nose.position.y // ※上に行くほどyの値が小さくなる
       // console.log(position)
+      // 精度が0.9以上の時最大値最小値を更新
       if (nose.score > 0.9) updateM(position)
-      // 回数0回の時、始まってから2秒経ち、max+disより高くなれば1回
       // console.log(nose.score)
       // console.log(max)
       dis = (min - max) / 3
+      // 回数0回の時、始まってから2秒経ち、max+disより高くなれば1回
       if (count == 0 && ccount > 200 && max + dis > position) {
         count = 1
         // console.log('count = 1')
       }
-      // 上に行くほどposition値が小さくなる
+
       if (count > 0) {
         if (position >= min - dis) down = true
         if (position <= max + dis) up = true
@@ -110,15 +112,16 @@ export const CanvasComponent = () => {
           up = false
         }
       }
+      // スクワット回数表示
       if (count % 2 != 0) {
         console.log(count / 2 + 0.5)
       }
     }
 
-    // 上に行くほどposition値が小さくなる
-    function updateM(position: number) {
-      if (position < max) max = position
-      if (position > min) min = position
+    // ※上に行くほどyの値が小さくなる
+    function updateM(yposition: number) {
+      if (yposition < max) max = yposition
+      if (yposition > min) min = yposition
     }
   }
 
