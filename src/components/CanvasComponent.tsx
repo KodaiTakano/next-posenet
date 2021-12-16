@@ -19,6 +19,12 @@ export const CanvasComponent = () => {
   let video
   let poseNet
   let poses
+  var ccount = 0
+  var count = 0
+  var max: number = 900
+  var min: number = 0
+  var down: boolean = false
+  var up: boolean = false
 
   const sketch = (p: p5) => {
     p.setup = () => {
@@ -41,13 +47,16 @@ export const CanvasComponent = () => {
 
     p.draw = () => {
       video && p.image(video, 0, 0, p.width, p.height)
+      if (!poses) return
+      if (poses.length === 0) return
       // console.log(poses)
       drawKeypoints()
       drawSkeleton()
+      counts()
+      ccount++
     }
 
     function drawKeypoints() {
-      if (!poses) return
       let pose = poses[0].pose
       for (let j = 0; j < pose.keypoints.length; j++) {
         let keypoint = pose.keypoints[j]
@@ -61,7 +70,6 @@ export const CanvasComponent = () => {
     }
 
     function drawSkeleton() {
-      if (!poses) return
       let skeleton = poses[0].skeleton
       for (let j = 0; j < skeleton.length; j++) {
         let partA = skeleton[j][0]
@@ -75,6 +83,42 @@ export const CanvasComponent = () => {
           partB.position.y
         )
       }
+    }
+
+    function counts() {
+      let dis: number
+      let nose = poses[0].pose.keypoints[0]
+      // console.log(nose)
+      let position: number = nose.position.y
+      // console.log(position)
+      if (nose.score > 0.9) updateM(position)
+      // 回数0回の時、始まってから2秒経ち、max+disより高くなれば1回
+      // console.log(nose.score)
+      // console.log(max)
+      dis = (min - max) / 3
+      if (count == 0 && ccount > 200 && max + dis > position) {
+        count = 1
+        // console.log('count = 1')
+      }
+      // 上に行くほどposition値が小さくなる
+      if (count > 0) {
+        if (position >= min - dis) down = true
+        if (position <= max + dis) up = true
+        if (down == true && up == true) {
+          count++
+          down = false
+          up = false
+        }
+      }
+      if (count % 2 != 0) {
+        console.log(count / 2 + 0.5)
+      }
+    }
+
+    // 上に行くほどposition値が小さくなる
+    function updateM(position: number) {
+      if (position < max) max = position
+      if (position > min) min = position
     }
   }
 
