@@ -21,12 +21,13 @@ export const CanvasComponent = () => {
   let poses
   var ccount = 0 // counts()を回した回数
   var count = 0 // スクワット回数もどき
+  var precount = 0 // 一個前のcount
   var max: number = 900
   var min: number = 0
   var down: boolean = false
   var up: boolean = false
 
-  const sketch = (p: p5) => {
+  const sketch1 = (p: p5) => {
     p.setup = () => {
       p.createCanvas(800, 900)
       video = p.createCapture(p.VIDEO)
@@ -113,8 +114,9 @@ export const CanvasComponent = () => {
         }
       }
       // スクワット回数表示
-      if (count % 2 != 0) {
+      if (count % 2 != 0 && count != precount) {
         console.log(count / 2 + 0.5)
+        precount++
       }
     }
 
@@ -125,5 +127,70 @@ export const CanvasComponent = () => {
     }
   }
 
-  return <Sketch sketch={sketch} />
+  const sketch2 = (p: p5) => {
+    p.setup = () => {
+      p.createCanvas(800, 900)
+      // video = p.createCapture(p.VIDEO)
+      // if (!video) return
+      // video.size(p.width, p.height)
+      // poseNet = ml5.poseNet(video, ml5.modelReady)
+
+      // poseNet &&
+      //   poseNet.on('pose', (results) => {
+      //     poses = results
+      //   })
+      // video.hide()
+    }
+
+    // ml5.modelReady = () => {
+    //   console.log('ready!')
+    // }
+
+    // 0.01秒ごとに実行される
+    p.draw = () => {
+      // video && p.image(video, 0, 0, p.width, p.height)
+      p.background(0)
+      if (!poses) return
+      if (poses.length === 0) return
+      // console.log(poses)
+      drawKeypoints()
+      drawSkeleton()
+    }
+
+    function drawKeypoints() {
+      let pose = poses[0].pose
+      for (let j = 0; j < pose.keypoints.length; j++) {
+        let keypoint = pose.keypoints[j]
+        if (keypoint.score > 0.2) {
+          p.fill(0, 0, 0)
+          p.stroke(255, 255, 255)
+          p.strokeWeight(8)
+          p.ellipse(keypoint.position.x, keypoint.position.y, 20, 20)
+        }
+      }
+    }
+
+    function drawSkeleton() {
+      let skeleton = poses[0].skeleton
+      for (let j = 0; j < skeleton.length; j++) {
+        let partA = skeleton[j][0]
+        let partB = skeleton[j][1]
+        p.stroke(0, 0, 0)
+        p.strokeWeight(20)
+        p.line(
+          partA.position.x,
+          partA.position.y,
+          partB.position.x,
+          partB.position.y
+        )
+      }
+    }
+  }
+
+  return (
+    <>
+      <Sketch sketch={sketch1} />
+      <Sketch sketch={sketch2} />
+    </>
+  )
 }
