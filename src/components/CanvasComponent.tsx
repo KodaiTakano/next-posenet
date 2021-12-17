@@ -175,7 +175,7 @@ export const CanvasComponent = () => {
       for (let j = 0; j < skeleton.length; j++) {
         let partA = skeleton[j][0]
         let partB = skeleton[j][1]
-        p.stroke(0, 0, 0)
+        p.stroke(255, 255, 255)
         p.strokeWeight(20)
         p.line(
           partA.position.x,
